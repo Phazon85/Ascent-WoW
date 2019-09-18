@@ -113,164 +113,35 @@ func (c *Config) StateReady(s *discordgo.Session, r *discordgo.Ready) {
 	}
 }
 
-// //InitHandlerService takes in a SQL object for package to use
-// func (c *Config) InitHandlerService(dgs *discordgo.Session, kw string) *Config {
+func (c *Config) MessageReactionAdd(s *discordgo.Session, mra *discordgo.MessageReactionAdd) {
+	//Get the user
+	user, err := s.User(mra.UserID)
+	if err != nil {
+		log.Printf("Error getting user in MessageReactionAdd: %s", err.Error())
+		return
+	}
 
-// 	dgs.AddHandler(c.StateReady)
+	//Get the guild
+	guild, err := s.Guild(mra.GuildID)
+	if err != nil {
+		log.Printf("Error getting guild in MessageReactionAdd: %s", err.Error())
+		return
+	}
 
-// 	return &Config{
-// 		Session:    dgs,
-// 		BotKeyword: kw,
-// 	}
-// }
+	found := false
+	var guildMember *discordgo.Member
 
-// //MessageReactionAdd is the call back for the MessageReactionAdd event from Discord
-// func (e *Config) MessageReactionAdd(s *discordgo.Session, mr *discordgo.MessageReactionAdd) {
+	for _, member := range guild.Members {
+		if member.User.ID == user.ID {
+			found = true
+			guildMember = member
+			break
+		}
+	}
 
-// 	//Get the User ID
-// 	user, err := s.User(mr.UserID)
-// 	if err != nil {
-// 		log.Printf("Error getting user ID for MessageReactionAdd: %s", err.Error())
-// 	}
+	if !found {
+		log.Printf("User not found in guild in MessageReactionAdd: %s", err.Error())
+		return
+	}
 
-// 	//Get the Guild ID
-// 	guild, err := s.Guild(mr.GuildID)
-// 	if err != nil {
-// 		log.Printf("Error getting guild ID for MessageReactionAdd: %s", err.Error())
-// 		return
-// 	}
-
-// 	//Get the Guild's roles
-// 	guildRoles, dErr := guildRoles(s, mr.GuildID)
-// 	if dErr != nil {
-// 		log.Printf("Error getting guild roles for MessageReactionAdd: %s", err.Error())
-// 		return
-// 	}
-
-// 	// Get the guild member's roles
-// 	memberRoles, err := guildMemberRoles(s, user, guild)
-// 	if err != nil {
-// 		log.Printf("Error getting guild member's roles for MessageReactionAdd: %s", err.Error())
-// 		return
-// 	}
-
-// 	//Check to see if the role already exists in the guild
-// 	for _, role := range guildRoles {
-// 		if role.Name != "Guild Member" {
-// 			continue
-// 		}
-
-// 		//Check to see if the member already has the role
-// 		for _, mRole := range memberRoles {
-// 			if mRole.ID == role.ID {
-// 				return // User already has role, no change
-// 			}
-// 		}
-
-// 		//Add role to member
-// 		grantRole(s, user, guild, role)
-// 	}
-// }
-
-// func guildRoles(s *discordgo.Session, guildID string) (roles []*discordgo.Role, dErr *discordError) {
-// 	roles, err := s.GuildRoles(guildID)
-// 	if err != nil {
-// 		//Find the JSON with Regular Expression
-// 		rx := regexp.MustCompile("{.*}")
-// 		errHTTPString := rx.ReplaceAllString(err.Error(), "")
-// 		errJSONString := rx.FindString(err.Error())
-
-// 		dAPIResp := &DiscordAPIReponse{}
-
-// 		dErr = &discordError{
-// 			HTTPResponseMessage: errHTTPString,
-// 			APIResponse:         dAPIResp,
-// 			CustomMessage:       "",
-// 		}
-
-// 		unmarshallErr := json.Unmarshal([]byte(errJSONString), dAPIResp)
-// 		if unmarshallErr != nil {
-// 			dAPIResp.Code = -1
-// 			dAPIResp.Message = "Unable to unmarshall API JSON Response: " + errJSONString
-// 			return
-// 		}
-
-// 		//Add Custom Messages as appropriate
-// 		switch dErr.APIResponse.Code {
-// 		case 50013: // Code 50013: "Missing Permissions"
-// 			dErr.CustomMessage = "Insufficient role permission to query guild roles"
-// 		}
-// 	}
-// 	return
-// }
-
-// func guildMemberRoles(s *discordgo.Session, user *discordgo.User, guild *discordgo.Guild) ([]*discordgo.Role, error) {
-// 	//Get Guild member
-// 	guildMember, err := s.GuildMember(guild.ID, user.ID)
-// 	if err != nil {
-// 		return make([]*discordgo.Role, 0),
-// 			err
-// 	}
-
-// 	//Get guild roles
-// 	guildRoles, dErr := guildRoles(s, guild.ID)
-// 	if dErr != nil {
-// 		return make([]*discordgo.Role, 0), dErr
-// 	}
-
-// 	//map our member roles
-// 	memberRoleIDs := make(map[string]bool)
-// 	for _, roleID := range guildMember.Roles {
-// 		memberRoleIDs[roleID] = true
-// 	}
-
-// 	memberRoles := make([]*discordgo.Role, 0)
-
-// 	for _, role := range guildRoles {
-// 		if memberRoleIDs[role.ID] {
-// 			memberRoles = append(memberRoles, role)
-// 		}
-// 	}
-
-// 	return memberRoles, nil
-// }
-
-// func grantRole(s *discordgo.Session, user *discordgo.User, guild *discordgo.Guild, role *discordgo.Role) {
-// 	err := s.GuildMemberRoleAdd(guild.ID, user.ID, role.ID)
-// 	if err != nil {
-// 		log.Printf("Error adding role to member: %s", err.Error())
-// 		return
-// 	}
-// }
-
-// //DiscordAPIReponse holds API responses to requests
-// type DiscordAPIReponse struct {
-// 	Code    int    `json:"code"`
-// 	Message string `json:"message"`
-// }
-
-// type discordError struct {
-// 	HTTPResponseMessage string
-// 	APIResponse         *DiscordAPIReponse
-// 	CustomMessage       string
-// }
-
-// // (dErr *discordError) Error satisfies the error interface
-// func (dErr *discordError) Error() string {
-// 	return "error from Discord API: " + dErr.String()
-// }
-
-// // (dErr *discordError) String satisfies the fmt.Stringer interface
-// func (dErr *discordError) String() string {
-// 	buf := bytes.NewBuffer([]byte{})
-
-// 	if dErr.CustomMessage != "" {
-// 		buf.Write([]byte("CustomMessage: " + dErr.CustomMessage + ", "))
-// 	}
-
-// 	buf.Write([]byte("HTTPResponseMessage: " + dErr.HTTPResponseMessage + ", "))
-// 	buf.Write([]byte("APIResponse.Code: " + strconv.Itoa(dErr.APIResponse.Code) + ", "))
-// 	buf.Write([]byte("APIResponse.Message: " + dErr.APIResponse.Message))
-
-// 	return buf.String()
-// }
+}
