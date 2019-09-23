@@ -11,7 +11,8 @@ import (
 
 //BotConfig holds system environment variables
 type BotConfig struct {
-	Token string
+	Token  string
+	Config *services.Config
 }
 
 // CheckBotConfig loads BOT_TOKEN and BOT_KEYWORD secrets
@@ -23,8 +24,51 @@ func CheckBotConfig() (*BotConfig, error) {
 		return nil, err
 	}
 
+	helpMessage := &discordgo.MessageEmbed{
+		URL:   "https://github.com/Phazon85/Ascent-WoW",
+		Title: "Help Section",
+		Color: 0x031cfc,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name: "Help Section",
+				Value: `
+			help - Displays this! :D
+			info - Displays information about the bot
+			`,
+				Inline: false,
+			},
+		},
+	}
+
+	infoMessage := &discordgo.MessageEmbed{
+		URL:    "https://github.com/Phazon85/Ascent-WoW",
+		Title:  "Ascent-WoW Discord Bot",
+		Color:  0x031cfc,
+		Footer: &discordgo.MessageEmbedFooter{Text: "Made using the discordgo library"},
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "About",
+				Value:  "Ascent-WoW is a bot... To be added",
+				Inline: false,
+			},
+			{
+				Name:   "Author",
+				Value:  "Ascent-WoW bot was created by Phazon85/Tourian",
+				Inline: false,
+			},
+			{
+				Name:   "Library",
+				Value:  "Ascent-WoW uses the discordgo library by bwmarrin",
+				Inline: false,
+			},
+		},
+	}
+
+	config := services.NewHandlers(helpMessage, infoMessage, os.Getenv("BOT_KEYWORD"))
+
 	return &BotConfig{
-		Token: token,
+		Token:  token,
+		Config: config,
 	}, nil
 }
 
@@ -41,10 +85,6 @@ func main() {
 	dg, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
 		log.Printf("Error creating new discord session: %s", err.Error())
-	}
-
-	callbackConfig := &services.Config{
-		BotKeyword: os.Getenv("BOT_KEYWORD"),
 	}
 
 	dg.AddHandler(callbackConfig.StateReady)
