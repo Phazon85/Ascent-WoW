@@ -49,6 +49,7 @@ func main() {
 
 	dg.AddHandler(config.Config.StateReady)
 	dg.AddHandler(config.Config.MessageCreate)
+	dg.AddHandler(config.Config.MessageReactionAdd)
 
 	//Starts discord event listener
 	err = dg.Open()
