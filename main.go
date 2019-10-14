@@ -44,6 +44,7 @@ func main() {
 	if err != nil {
 		config.Log.Debug("Failed to get required Bot Config")
 	}
+	defer config.Log.Sync()
 
 	//Create new discordgo session
 	dg, err := discordgo.New("Bot " + config.Token)
