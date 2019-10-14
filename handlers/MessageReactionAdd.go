@@ -58,22 +58,25 @@ func (c *Config) MessageReactionAdd(s *discordgo.Session, mra *discordgo.Message
 		event.GuildRoleMap[role.ID] = role
 	}
 
-	log.Printf("Channel ID: " + mra.ChannelID)
-	log.Printf("Emoji ID: " + mra.Emoji.ID)
-	log.Printf("Emoji Name: " + mra.Emoji.Name)
-	log.Printf("User ID: " + mra.UserID)
+	switch mra.Emoji.ID {
+	//If user reacts with "Horde", apply Guild Member Role to user
+	case "633097926402637824":
 
-	//Checking to see if user already has the Guild Member role
-	for _, memberRoleID := range event.GuildMember.Roles {
-		if event.GuildRoleMap[memberRoleID].ID == "616443279051063313" {
-			return
+		//Checking to see if user already has the Guild Member role
+		for _, memberRoleID := range event.GuildMember.Roles {
+			if event.GuildRoleMap[memberRoleID].ID == "616443279051063313" {
+				return
+			}
 		}
-	}
 
-	for _, guildRole := range event.GuildRoleMap {
-		if guildRole.ID == "616443279051063313" {
-			grantGuildMemberRole(event, guildRole)
+		//checking to see if role exists in guild, then assigns it to user
+		for _, guildRole := range event.GuildRoleMap {
+			if guildRole.ID == "616443279051063313" {
+				grantGuildMemberRole(event, guildRole)
+			}
 		}
+
+		//TODO: Add Class emojis to give permissions to view class general chats in discord
 	}
 
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-//Actions implements the config struct
+//Actions implements the different Discord callbacks
 type Actions interface {
 	MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate)
 	MessageReactionAdd(s *discordgo.Session, mra *discordgo.MessageReactionAdd)
@@ -16,7 +16,7 @@ type Config struct {
 	BotKeyword string
 }
 
-//NewHandlers takes in helper and info
+//NewHandlers takes in bot info and returns a Config
 func NewHandlers(
 	botkey string,
 ) *Config {
