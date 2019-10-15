@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"strconv"
 
+	"github.com/phazon85/Ascent-WoW/helpers/logging"
+
 	"github.com/bwmarrin/discordgo"
-	"go.uber.org/zap"
 )
 
 //Actions implements the different Discord callbacks
@@ -17,7 +18,7 @@ type Actions interface {
 
 //Config implements the Config interface
 type Config struct {
-	Log        *zap.Logger
+	Log        *logging.ZapLogger
 	BotKeyword string
 }
 
@@ -54,7 +55,7 @@ func (dErr *discordError) String() string {
 //NewHandlers takes in bot info and returns a Config
 func NewHandlers(
 	botkey string,
-	log *zap.Logger,
+	log *logging.ZapLogger,
 ) *Config {
 	return &Config{
 		Log:        log,
