@@ -7,14 +7,13 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/phazon85/Ascent-WoW/handlers"
 	"github.com/phazon85/Ascent-WoW/helpers/logging"
-	"go.uber.org/zap"
 )
 
 //BotConfig holds system environment variables
 type BotConfig struct {
 	Token  string
 	Config *handlers.Config
-	Log    *zap.Logger
+	Log    *logging.ZapLogger
 }
 
 // CheckBotConfig loads BOT_TOKEN and BOT_KEYWORD secrets
@@ -42,13 +41,14 @@ func main() {
 	//load environment variables
 	config, err := CheckBotConfig()
 	if err != nil {
-		config.Log.Debug("Failed to get required Bot Config")
+		config.Log.Log.Debug("Failed to get required Bot Config")
 	}
+	defer config.Log.Log.Sync()
 
 	//Create new discordgo session
 	dg, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
-		config.Log.Debug("Failed to generate new Discord session")
+		config.Log.Log.Debug("Failed to generate new Discord session")
 	}
 
 	dg.AddHandler(config.Config.StateReady)
@@ -58,7 +58,7 @@ func main() {
 	//Starts discord event listener
 	err = dg.Open()
 	if err != nil {
-		config.Log.Debug("Failed to start Discord event listeners")
+		config.Log.Log.Debug("Failed to start Discord event listeners")
 	}
 	defer dg.Close()
 
