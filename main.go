@@ -13,7 +13,7 @@ import (
 type BotConfig struct {
 	Token  string
 	Config *handlers.Config
-	Log    *logging.ZapLogger
+	Logger *logging.ZapLogger
 }
 
 // CheckBotConfig loads BOT_TOKEN and BOT_KEYWORD secrets
@@ -32,7 +32,7 @@ func CheckBotConfig() (*BotConfig, error) {
 	return &BotConfig{
 		Token:  token,
 		Config: config,
-		Log:    log,
+		Logger: log,
 	}, nil
 }
 
@@ -41,14 +41,14 @@ func main() {
 	//load environment variables
 	config, err := CheckBotConfig()
 	if err != nil {
-		config.Log.Log.Debug("Failed to get required Bot Config")
+		config.Logger.Log.Debug("Failed to get required Bot Config")
 	}
-	defer config.Log.Log.Sync()
+	defer config.Logger.Log.Sync()
 
 	//Create new discordgo session
 	dg, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
-		config.Log.Log.Debug("Failed to generate new Discord session")
+		config.Logger.Log.Debug("Failed to generate new Discord session")
 	}
 
 	dg.AddHandler(config.Config.StateReady)
@@ -58,7 +58,7 @@ func main() {
 	//Starts discord event listener
 	err = dg.Open()
 	if err != nil {
-		config.Log.Log.Debug("Failed to start Discord event listeners")
+		config.Logger.Log.Debug("Failed to start Discord event listeners")
 	}
 	defer dg.Close()
 

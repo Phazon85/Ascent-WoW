@@ -18,7 +18,7 @@ type Actions interface {
 
 //Config implements the Config interface
 type Config struct {
-	Log        *logging.ZapLogger
+	Logger     *logging.ZapLogger
 	BotKeyword string
 }
 
@@ -58,7 +58,7 @@ func NewHandlers(
 	log *logging.ZapLogger,
 ) *Config {
 	return &Config{
-		Log:        log,
+		Logger:     log,
 		BotKeyword: botkey,
 	}
 }

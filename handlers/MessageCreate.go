@@ -48,21 +48,21 @@ func (c *Config) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate)
 
 			switch levelOpt {
 			case "debug":
-				c.Log.Level.SetLevel(zapcore.DebugLevel)
-				c.Log.Log.Debug("Log level changed to Debug")
+				c.Logger.Level.SetLevel(zapcore.DebugLevel)
+				c.Logger.Log.Debug("Log level changed to Debug")
 			case "info":
-				c.Log.Level.SetLevel(zapcore.InfoLevel)
-				c.Log.Log.Info("Log level changed to Info")
+				c.Logger.Level.SetLevel(zapcore.InfoLevel)
+				c.Logger.Log.Info("Log level changed to Info")
 			case "warn":
-				c.Log.Level.SetLevel(zapcore.WarnLevel)
-				c.Log.Log.Warn("Log level changed to Warn")
+				c.Logger.Level.SetLevel(zapcore.WarnLevel)
+				c.Logger.Log.Warn("Log level changed to Warn")
 			case "error":
-				c.Log.Level.SetLevel(zapcore.ErrorLevel)
-				c.Log.Log.Error("Log level changed to Error")
+				c.Logger.Level.SetLevel(zapcore.ErrorLevel)
+				c.Logger.Log.Error("Log level changed to Error")
 			case "fatal":
-				c.Log.Level.SetLevel(zapcore.FatalLevel)
+				c.Logger.Level.SetLevel(zapcore.FatalLevel)
 			case "panic":
-				c.Log.Level.SetLevel(zapcore.PanicLevel)
+				c.Logger.Level.SetLevel(zapcore.PanicLevel)
 			}
 		}
 	default:
