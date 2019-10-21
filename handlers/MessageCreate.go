@@ -65,6 +65,19 @@ func (c *Config) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate)
 				c.Logger.Level.SetLevel(zapcore.PanicLevel)
 			}
 		}
+
+	case "raid":
+		if len(contentTokens) >= 3 {
+			raidOpt := strings.ToLower(contentTokens[2])
+
+			switch raidOpt {
+			case "start":
+				c.Logger.Log.Debug("Starting Raid")
+				// c.Mongo.InitiateRaid()
+				s.ChannelMessageSend(m.ChannelID, "Raid has been started")
+			}
+
+		}
 	default:
 		//Silently fail for any unregistered commands
 	}

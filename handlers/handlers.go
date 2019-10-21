@@ -63,5 +63,6 @@ func NewHandlers(
 	return &Config{
 		Logger:     log,
 		BotKeyword: botkey,
+		Mongo:      mongo,
 	}
 }

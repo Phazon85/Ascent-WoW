@@ -4,6 +4,8 @@ import (
 	"errors"
 	"os"
 
+	"github.com/phazon85/Ascent-WoW/helpers/mongo"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/phazon85/Ascent-WoW/handlers"
 	"github.com/phazon85/Ascent-WoW/helpers/logging"
@@ -19,15 +21,22 @@ type BotConfig struct {
 // CheckBotConfig loads BOT_TOKEN and BOT_KEYWORD secrets
 func CheckBotConfig() (*BotConfig, error) {
 
+	uri := os.Getenv("MONGO_URI")
+	collection := os.Getenv("MONGO_COLLECTION")
+	name := os.Getenv("MONGO_NAME")
+
 	token := os.Getenv("BOT_TOKEN")
-	if token == "" {
-		err := errors.New("BOT_TOKEN not defined in environment variables")
+	keyword := os.Getenv("BOT_KEYWORD")
+	if token == "" || keyword == "" {
+		err := errors.New("Variables not defined in environment")
 		return nil, err
 	}
 
 	log := logging.NewLogger()
 
-	config := handlers.NewHandlers(os.Getenv("BOT_KEYWORD"), log)
+	mongo := mongo.NewMongoService(uri, name, collection)
+
+	config := handlers.NewHandlers(keyword, log, mongo)
 
 	return &BotConfig{
 		Token:  token,
