@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/phazon85/Ascent-WoW/helpers/logging"
-	"github.com/phazon85/Ascent-WoW/helpers/mongo"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -21,7 +20,7 @@ type Actions interface {
 type Config struct {
 	Logger     *logging.ZapLogger
 	BotKeyword string
-	Mongo      *mongo.MongoService
+	Mongo      *mongo.Client
 }
 
 //DiscordAPIResponse is a receiving struct for API JSON responses
