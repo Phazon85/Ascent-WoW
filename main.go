@@ -39,26 +39,26 @@ func CheckBotConfig() (*BotConfig, error) {
 func main() {
 
 	//load environment variables
-	config, err := CheckBotConfig()
+	cfg, err := CheckBotConfig()
 	if err != nil {
-		config.Logger.Log.Debug("Failed to get required Bot Config")
+		cfg.Logger.Log.Debug("Failed to get required Bot Config")
 	}
-	defer config.Logger.Log.Sync()
+	defer cfg.Logger.Log.Sync()
 
 	//Create new discordgo session
-	dg, err := discordgo.New("Bot " + config.Token)
+	dg, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
-		config.Logger.Log.Debug("Failed to generate new Discord session")
+		cfg.Logger.Log.Debug("Failed to generate new Discord session")
 	}
 
-	dg.AddHandler(config.Config.StateReady)
-	dg.AddHandler(config.Config.MessageCreate)
-	dg.AddHandler(config.Config.MessageReactionAdd)
+	dg.AddHandler(cfg.Config.StateReady)
+	dg.AddHandler(cfg.Config.MessageCreate)
+	dg.AddHandler(cfg.Config.MessageReactionAdd)
 
 	//Starts discord event listener
 	err = dg.Open()
 	if err != nil {
-		config.Logger.Log.Debug("Failed to start Discord event listeners")
+		cfg.Logger.Log.Debug("Failed to start Discord event listeners")
 	}
 	defer dg.Close()
 

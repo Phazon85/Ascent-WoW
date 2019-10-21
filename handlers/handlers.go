@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/phazon85/Ascent-WoW/helpers/logging"
+	"github.com/phazon85/Ascent-WoW/helpers/mongo"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -20,6 +21,7 @@ type Actions interface {
 type Config struct {
 	Logger     *logging.ZapLogger
 	BotKeyword string
+	Mongo      *mongo.MongoService
 }
 
 //DiscordAPIResponse is a receiving struct for API JSON responses
@@ -56,6 +58,7 @@ func (dErr *discordError) String() string {
 func NewHandlers(
 	botkey string,
 	log *logging.ZapLogger,
+	mongo *mongo.MongoService,
 ) *Config {
 	return &Config{
 		Logger:     log,
