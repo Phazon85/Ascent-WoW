@@ -38,7 +38,7 @@ func CheckBotConfig() (*BotConfig, error) {
 
 	sql := postgres.NewDBObject(postgresFile, driverName)
 
-	config := handlers.NewHandlers(keyword, log)
+	config := handlers.NewHandlers(keyword, log, sql)
 
 	return &BotConfig{
 		Token:  token,
