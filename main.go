@@ -9,6 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/phazon85/Ascent-WoW/handlers"
 	"github.com/phazon85/Ascent-WoW/helpers/logging"
+	"github.com/phazon85/Ascent-WoW/helpers/postgres"
 )
 
 const (

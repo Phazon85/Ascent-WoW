@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"strconv"
 
+	"github.com/phazon85/Ascent-WoW/helpers/postgres"
+
 	"github.com/phazon85/Ascent-WoW/helpers/logging"
 
 	"github.com/bwmarrin/discordgo"
@@ -20,6 +22,7 @@ type Actions interface {
 type Config struct {
 	Logger     *logging.ZapLogger
 	BotKeyword string
+	SQL        *postgres.PSQLService
 }
 
 //DiscordAPIResponse is a receiving struct for API JSON responses
@@ -56,9 +59,11 @@ func (dErr *discordError) String() string {
 func NewHandlers(
 	botkey string,
 	log *logging.ZapLogger,
+	sql *postgres.PSQLService,
 ) *Config {
 	return &Config{
 		Logger:     log,
 		BotKeyword: botkey,
+		SQL:        sql,
 	}
 }
