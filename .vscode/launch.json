@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Launch",
             "type": "go",
@@ -11,7 +12,7 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "env": {
-                "BOT_TOKEN": "NjIwNzg3NjE4MTI4MzMwNzUz.Xa3J6g.q46a2sKTRC6QAjLmlcXLgcmyWag",
+                "BOT_TOKEN": "NjIwNzg3NjE4MTI4MzMwNzUz.Xa343Q.eh95AZFHGOMcTJdCDRCzX7G3wKc",
                 "BOT_KEYWORD": "!asc",
                 "MONGO_URI": "mongodb://localhost:27017",
                 "MONGO_NAME": "DKPService",

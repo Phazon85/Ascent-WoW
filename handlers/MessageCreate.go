@@ -73,11 +73,11 @@ func (c *Config) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate)
 			switch raidOpt {
 			case "start":
 				c.Logger.Log.Debug("Starting Raid")
-				// c.Mongo.InitiateRaid()
 				s.ChannelMessageSend(m.ChannelID, "Raid has been started")
 			}
 
 		}
+
 	default:
 		//Silently fail for any unregistered commands
 	}

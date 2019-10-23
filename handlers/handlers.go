@@ -20,7 +20,6 @@ type Actions interface {
 type Config struct {
 	Logger     *logging.ZapLogger
 	BotKeyword string
-	Mongo      *mongo.Client
 }
 
 //DiscordAPIResponse is a receiving struct for API JSON responses
@@ -57,11 +56,9 @@ func (dErr *discordError) String() string {
 func NewHandlers(
 	botkey string,
 	log *logging.ZapLogger,
-	mongo *mongo.MongoService,
 ) *Config {
 	return &Config{
 		Logger:     log,
 		BotKeyword: botkey,
-		Mongo:      mongo,
 	}
 }
