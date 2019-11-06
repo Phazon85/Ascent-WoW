@@ -4,6 +4,10 @@ import (
 	"log"
 	"strings"
 
+	"github.com/phazon85/Ascent-WoW/helpers/postgres"
+
+	"go.uber.org/zap"
+
 	"go.uber.org/zap/zapcore"
 
 	"github.com/bwmarrin/discordgo"
@@ -71,9 +75,40 @@ func (c *Config) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate)
 			raidOpt := strings.ToLower(contentTokens[2])
 
 			switch raidOpt {
-			case "start":
+			case "init":
 				c.Logger.Log.Debug("Starting Raid")
-				s.ChannelMessageSend(m.ChannelID, "Raid has been started")
+				groups, err := c.SQL.LoadAvailableRaidGroups()
+				if err != nil {
+					c.Logger.Log.Debug("Failed to retrieve all Raid Groups")
+				}
+
+				for _, raidgroup := range groups {
+					if raidgroup.ID == m.GuildID {
+						s.ChannelMessageSend(m.ChannelID, "Raid group already exists")
+						return
+					}
+				}
+
+				err = c.SQL.CreateRaidGroup(m.GuildID, m.Author.ID)
+				if err != nil {
+					c.Logger.Log.Info("Failed to create raid group", zap.String("Error: ", err.Error()))
+					return
+				}
+
+				s.ChannelMessageSend(m.ChannelID, "New Raid group created")
+				return
+			case "start":
+				raid := &postgres.Raid{
+					ID: m.GuildID,
+				}
+				c.Logger.Log.Debug("Starting raid group")
+				err := c.SQL.CreateRaid(raid)
+				if err != nil {
+					s.ChannelMessageSend(m.ChannelID, "Active Raid: There is currently an raid marked active for your guild.")
+					return
+				}
+				s.ChannelMessageSend(m.ChannelID, "New Raid started")
+				return
 			}
 
 		}
