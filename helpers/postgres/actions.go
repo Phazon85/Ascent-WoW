@@ -12,7 +12,7 @@ const (
 	insertNewRaidGroup     = "INSERT INTO raid_groups (id, author) VALUES ($1, $2);"
 	insertNewRaid          = "INSERT INTO raids(id, raidid, start_time, active) VALUES($1, $2, $3, $4);"
 	checkActiveRaid        = "SELECT * FROM raids WHERE id = '$1' and active = true'"
-	getRaid                = "SELECT * FROM raids WHERE id = '$1'"
+	getRaids               = "SELECT * FROM raids WHERE id = '%s'"
 	updateRaid             = `
 		UPDATE raids
 		SET members = '$1'
@@ -24,15 +24,17 @@ const (
 type Actions interface {
 	LoadAvailableRaidGroups() ([]*RaidGroup, error)
 	CreateRaidGroup(guildid, userid string) error
-	CreateRaid(guildid string) error
-	JoinRaid(guildid, memberid string) error
+	// CreateRaid(guildid string) error
+	// JoinRaid(guildid, memberid string) error
+	CheckActiveRaid(raidgroupid string) ([]Raid, error)
 }
 
 //RaidGroup hold specific raid group's DKP
 type RaidGroup struct {
-	ID   string
-	Name string
-	DKP  map[string]int
+	ID    string
+	Name  string
+	DKP   map[string]int
+	Raids []Raid
 }
 
 //Raid hold individual raid data

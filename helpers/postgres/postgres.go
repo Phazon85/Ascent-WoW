@@ -2,9 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/phazon85/multisql"
 )
 
@@ -49,33 +47,52 @@ func (p *PSQLService) CreateRaidGroup(guildid, userid string) error {
 	return err
 }
 
-//CreateRaid inserts a new raid and marks it active
-func (p *PSQLService) CreateRaid(raid *Raid) error {
-	result := p.checkActiveRaid(raid)
-	if result != nil {
-		return result
-	}
+// //CreateRaid inserts a new raid and marks it active
+// func (p *PSQLService) CreateRaid(raid *Raid) error {
+// 	result := p.checkActiveRaid(raid)
+// 	if result != nil {
+// 		return result
+// 	}
 
-	_, err := p.DB.Exec(insertNewRaid, raid.ID, uuid.New(), time.Now(), true)
-	return err
+// 	_, err := p.DB.Exec(insertNewRaid, raid.ID, uuid.New(), time.Now(), true)
+// 	return err
+// }
+
+//CheckActiveRaid takes in a RaidGroup struct and checks
+func (p *PSQLService) CheckActiveRaid(raidgroupid string) ([]Raid, error) {
+	results := []Raid{}
+	//query DB for all raids attached to raid group and append to results empty slice
+	rows, err := p.DB.Query(getRaids, raidgroupid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		raid := Raid{}
+		err = rows.Scan(&raid.ID, &raid.RaidID, &raid.Members, &raid.StartTime, &raid.EndTime, &raid.ItemsAwarded, &raid.Active)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, raid)
+	}
+	return results, nil
+	//parse results for any raids marked as active
+	//If no active raid exists, append new raid to results and UPDATE DB record with new json
+
+	//return results or error
 }
 
-func (p *PSQLService) checkActiveRaid(raid *Raid) error {
-	result := &Raid{}
-	row := p.DB.QueryRow(getRaid, raid.ID)
-	_ = row.Scan(&result.ID, &result.RaidID, &result.Members, &result.StartTime, &result.EndTime, &result.ItemsAwarded, &result.Active)
-	if result.ID == raid.ID {
-		return errActiveRaid
-	}
-	return nil
-}
+// //JoinRaid checks to see if the discord user is currently a raider in the active raid's RaidGroup.
+// //If they are not in the current RaidGroup, then add them. Otherwise,
+// func (p *PSQLService) JoinRaid(raidGroup *RaidGroup, Raid *Raid) error {
 
-// func (p *PSQLService) JoinRaid() error {
 // 	// Get raid
-// 	raid := getRaid(guildid)
-// 	//Check to see if member has already joined from raid we just got
+// 	raid := p.getRaid(guildid)
+// 	//Check to see if raider has already joined raid group from active server raid
 
-// 	//If not add member to raid
+// 	//If not add raider to raid group and add to active status
+
+// 	//If apart of raid group, set active
 
 // 	//return error if it didn't work
 
@@ -83,5 +100,5 @@ func (p *PSQLService) checkActiveRaid(raid *Raid) error {
 
 // func (p *PSQLService) getRaid(raidid string) *Raid {
 // 	result := &Raid{}
-// 	row := p.DB.QueryRow()
+// 	row := p.DB.QueryRow(getRaid, raidid)
 // }

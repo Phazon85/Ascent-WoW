@@ -12,11 +12,8 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "env": {
-                "BOT_TOKEN": "NjIwNzg3NjE4MTI4MzMwNzUz.Xa343Q.eh95AZFHGOMcTJdCDRCzX7G3wKc",
+                "BOT_TOKEN": "NjIwNzg3NjE4MTI4MzMwNzUz.XbKCSg.Kzh2_u6w-zWtVzjV0EBKmn5cPdk",
                 "BOT_KEYWORD": "!asc",
-                "MONGO_URI": "mongodb://localhost:27017",
-                "MONGO_NAME": "DKPService",
-                "MONGO_COLLECTION": "raid-groups"
             },
             "args": []
         }
