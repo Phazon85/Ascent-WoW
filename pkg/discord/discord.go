@@ -7,9 +7,8 @@ import (
 
 //Discord ...
 type Discord struct {
-	Token   string
-	Keyword string
-	DKP     DKP
+	Logger *zap.Logger
+	Prefix string
 }
 
 //DKP ...
@@ -24,8 +23,13 @@ func New(dkp DKP, logger *zap.Logger, token, prefix string) *discordgo.Session {
 		logger.Debug("Failed to generate new Discord session", zap.String("Error", err.Error()))
 	}
 
+	d := &Discord{
+		Logger: logger,
+		Prefix: prefix,
+	}
+
 	//API Endpoints
-	dg.AddHandler(messageCreate(dkp, prefix, logger))
+	dg.AddHandler(messageCreate(dkp, d))
 	dg.AddHandler(stateReady(prefix, logger))
 
 	err = dg.Open()

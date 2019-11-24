@@ -12,6 +12,7 @@ type Service struct {
 //Repository holds functions for interacting with the repo database
 type Repository interface {
 	InitRaidGroup(mc *discordgo.MessageCreate) error
+	StartRaid(mc *discordgo.MessageCreate) error
 }
 
 //New ...
@@ -24,4 +25,9 @@ func New(repo Repository) *Service {
 //InitRaidGroup ...
 func (s *Service) InitRaidGroup(mc *discordgo.MessageCreate) error {
 	return s.repo.InitRaidGroup(mc)
+}
+
+//StartRaid ...
+func (s *Service) StartRaid(mc *discordgo.MessageCreate) error {
+	return s.repo.StartRaid(mc)
 }
