@@ -1,28 +1,29 @@
 package discord
 
-// import (
-// 	"log"
-// 	"strings"
+import (
+	"strings"
 
-// 	"github.com/bwmarrin/discordgo"
-// )
+	"github.com/bwmarrin/discordgo"
+	"go.uber.org/zap"
+)
 
-// //StateReady is the callback for the Ready event from Discord
-// func (c *Config) StateReady(s *discordgo.Session, r *discordgo.Ready) {
-// 	idleSince := 0
+func stateReady(prefix string, logger *zap.Logger) func(*discordgo.Session, *discordgo.Ready) {
+	return func(s *discordgo.Session, r *discordgo.Ready) {
+		idleSince := 0
 
-// 	usd := discordgo.UpdateStatusData{
-// 		IdleSince: &idleSince,
-// 		Game: &discordgo.Game{
-// 			Name: strings.TrimSpace(c.BotKeyword),
-// 			Type: discordgo.GameTypeWatching,
-// 		},
-// 		AFK:    false,
-// 		Status: "online",
-// 	}
+		usd := discordgo.UpdateStatusData{
+			IdleSince: &idleSince,
+			Game: &discordgo.Game{
+				Name: strings.TrimSpace(prefix),
+				Type: discordgo.GameTypeWatching,
+			},
+			AFK:    false,
+			Status: "online",
+		}
 
-// 	err := s.UpdateStatusComplex(usd)
-// 	if err != nil {
-// 		log.Printf("Error setting status: %s", err.Error())
-// 	}
-// }
+		err := s.UpdateStatusComplex(usd)
+		if err != nil {
+			logger.Debug("Setting Status to online", zap.String("status: ", err.Error()))
+		}
+	}
+}

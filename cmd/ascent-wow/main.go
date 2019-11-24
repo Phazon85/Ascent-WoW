@@ -66,7 +66,7 @@ func main() {
 	pgsql := pgsql.New(db)
 	dkp := dkp.New(pgsql)
 
-	dg := discord.New(dkp, logger, token)
+	dg := discord.New(dkp, logger, token, keyword)
 	defer dg.Close()
 
 	//Keeps listeners alive

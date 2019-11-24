@@ -4,12 +4,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-//Service ...
+//Service holds a database service to query for results
 type Service struct {
 	repo Repository
 }
 
-//Repository ...
+//Repository holds functions for interacting with the repo database
 type Repository interface {
 	InitRaidGroup(mc *discordgo.MessageCreate) error
 }

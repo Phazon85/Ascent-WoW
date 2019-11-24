@@ -18,16 +18,17 @@ type DKP interface {
 }
 
 //New ...
-func New(dkp DKP, logger *zap.Logger, token string) *discordgo.Session {
+func New(dkp DKP, logger *zap.Logger, token, prefix string) *discordgo.Session {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		logger.Debug("Failed to generate new Discord session", zap.String("Error", err.Error()))
 	}
 
 	//API Endpoints
-	dg.AddHandler(MessageCreate)
+	dg.AddHandler(messageCreate(dkp, prefix, logger))
+	dg.AddHandler(stateReady(prefix, logger))
 
-	dg.Open()
+	err = dg.Open()
 	if err != nil {
 		logger.Debug("Failed to start Discord event listeners", zap.String("Discord Reponse", err.Error()))
 	}
