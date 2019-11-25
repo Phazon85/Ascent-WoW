@@ -15,13 +15,17 @@ var (
 	errNoRaidGroup       = errors.New("Could not find an active raidgroup")
 	errRaidGroupExists   = errors.New("Raid Group already exists")
 	errNoRaidGroupExists = errors.New("Raid Group does not exists")
+	errNoActiveRaid      = errors.New("No active raids")
 )
 
 const (
 	checkActiveRaidGroup = "SELECT id FROM raid_groups WHERE id=$1;"
+	checkActiveRaid      = "SELECT id FROM raids WHERE id=$1 AND active=true"
 	createRaidGroup      = "INSERT INTO raid_groups (id, author) VALUES ($1, $2);"
-	createRaid           = `INSET INTO raids (id, raidid, start_time, active) 
+	createRaid           = `INSERT INTO raids (id, raidid, start_time, active) 
 					VALUES ($1, $2, $3, $4);`
+	stopRaid      = `UPDATE raids SET active=false WHERE id=$1;`
+	getActiveRaid = `SELECT members FROM raids WHERE id=$1 AND active=true`
 )
 
 //RaidGroup hold specific raid group's DKP
@@ -95,11 +99,24 @@ func (c *Client) StartRaid(mc *discordgo.MessageCreate) error {
 	if err == nil {
 		return errNoRaidGroupExists
 	}
+	err = c.checkActiveRaid(mc.ChannelID)
+	if err != nil {
+		return err
+	}
 	raid := newRaid(mc)
 
 	_, err = c.DB.Exec(createRaid, raid.ID, raid.RaidID, raid.StartTime, raid.Active)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (c *Client) checkActiveRaid(id string) error {
+	result := &Raid{}
+	row := c.DB.QueryRow(checkActiveRaid, id)
+	if _ = row.Scan(&result.ID); result.ID == id {
+		return errActiveRaid
 	}
 	return nil
 }
@@ -111,4 +128,32 @@ func newRaid(mc *discordgo.MessageCreate) *Raid {
 		StartTime: time.Now(),
 		Active:    true,
 	}
+}
+
+//StopRaid ...
+func (c *Client) StopRaid(mc *discordgo.MessageCreate) error {
+	err := c.checkActiveRaid(mc.ChannelID)
+	if err != nil {
+		_, err := c.DB.Exec(stopRaid, mc.ChannelID)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return errNoActiveRaid
+}
+
+//JoinRaid ...
+func (c *Client) JoinRaid(mc *discordgo.MessageCreate) error {
+	raid := &Raid{}
+	err := c.checkActiveRaid(mc.ChannelID)
+	if err == nil {
+		return errNoActiveRaid
+	}
+	row := c.DB.QueryRow(getActiveRaid, mc.ChannelID)
+	err = row.Scan(&raid.Members)
+	if err != nil {
+		return err
+	}
+
 }

@@ -9,39 +9,40 @@ import (
 )
 
 const (
-	errRaidGroupAlreadyExists = "Raid group already exists for this channel"
+	errRaidGroupAlreadyExists = `Raid group already exists for this channel`
+	errActiveRaid             = `Active raid currently exists for your channel. Stop current raid before attempting to start a new one.`
 )
 
-func messageCreate(dkp DKP, prefix string, logger *zap.Logger) func(*discordgo.Session, *discordgo.MessageCreate) {
-	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
+func messageCreate(dkp DKP, d *Discord) func(*discordgo.Session, *discordgo.MessageCreate) {
+	return func(s *discordgo.Session, mc *discordgo.MessageCreate) {
 		// Ignore all messages created by the bot itself
-		if m.Author.ID == s.State.User.ID {
+		if mc.Author.ID == s.State.User.ID {
 			return
 		}
 
 		//Checks if bot keyword is present in message
-		if !strings.HasPrefix(m.Content, prefix) {
+		if !strings.HasPrefix(mc.Content, d.Prefix) {
 			return
 		}
 
 		// [BOT_KEYWORD] [command] [options] :: "!asc" "log_level" "debug"
-		contentTokens := strings.Split(strings.TrimSpace(m.Content), " ")
+		contentTokens := strings.Split(strings.TrimSpace(mc.Content), " ")
 		if len(contentTokens) < 2 {
 			return
 		}
 
 		switch strings.ToLower(contentTokens[1]) {
 		case "info":
-			_, err := s.ChannelMessageSendEmbed(m.ChannelID, infoMessage())
+			_, err := s.ChannelMessageSendEmbed(mc.ChannelID, infoMessage())
 			if err != nil {
-				logger.Debug("Sending Info message", zap.String("mc: ", err.Error()))
+				d.Logger.Debug("Sending Info message", zap.String("mc: ", err.Error()))
 				return
 			}
 
 		case "help":
-			_, err := s.ChannelMessageSendEmbed(m.ChannelID, helpMessage())
+			_, err := s.ChannelMessageSendEmbed(mc.ChannelID, helpMessage())
 			if err != nil {
-				logger.Debug("Sending Help message", zap.String("mc: ", err.Error()))
+				d.Logger.Debug("Sending Help message", zap.String("mc: ", err.Error()))
 				return
 			}
 		case "raid":
@@ -50,11 +51,29 @@ func messageCreate(dkp DKP, prefix string, logger *zap.Logger) func(*discordgo.S
 
 				switch raidOpt {
 				case "init":
-					err := dkp.InitRaidGroup(m)
+					err := dkp.InitRaidGroup(mc)
 					if err != nil {
-						logger.Debug("Raid group already exists", zap.String("dkp: ", err.Error()))
+						d.Logger.Debug("init raid request", zap.String("dkp: ", err.Error()))
 					}
-					_, err = s.ChannelMessageSend(m.ChannelID, errRaidGroupAlreadyExists)
+					_, err = s.ChannelMessageSend(mc.ChannelID, errRaidGroupAlreadyExists)
+				case "start":
+					err := dkp.StartRaid(mc)
+					if err != nil {
+						d.Logger.Debug("start raid request", zap.String("dkp: ", err.Error()))
+						_, err = s.ChannelMessageSend(mc.ChannelID, errActiveRaid)
+						return
+					}
+					_, err = s.ChannelMessageSend(mc.ChannelID, "Successfully started Raid")
+				case "stop":
+					err := dkp.StopRaid(mc)
+					if err != nil {
+						d.Logger.Debug("stop raid request", zap.String("dkp: ", err.Error()))
+						_, err = s.ChannelMessageSend(mc.ChannelID, "Failed to stop active raid. Please try again")
+						return
+					}
+					_, err = s.ChannelMessageSend(mc.ChannelID, "Successfully stopped Raid")
+				case "join":
+					err := dkp.
 				}
 			}
 		default:

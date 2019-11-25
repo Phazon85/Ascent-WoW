@@ -9,11 +9,14 @@ import (
 type Discord struct {
 	Logger *zap.Logger
 	Prefix string
+	
 }
 
 //DKP ...
 type DKP interface {
 	InitRaidGroup(mc *discordgo.MessageCreate) error
+	StartRaid(mc *discordgo.MessageCreate) error
+	StopRaid(mc *discordgo.MessageCreate) error
 }
 
 //New ...
