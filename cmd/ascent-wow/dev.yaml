@@ -2,5 +2,5 @@ host: "localhost"
 port: 5432
 user: "postgres"
 password: "changeme"
-name: "raid_groups"
+drivername: "postgres"
 dbname: "dkpservice"
