@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"fmt"
 	"strings"
 
 	"go.uber.org/zap"
@@ -73,11 +74,19 @@ func messageCreate(dkp DKP, d *Discord) func(*discordgo.Session, *discordgo.Mess
 					}
 					_, err = s.ChannelMessageSend(mc.ChannelID, "Successfully stopped Raid")
 				case "join":
-					err := dkp.
+					err := dkp.JoinRaid(mc)
+					if err != nil {
+						d.Logger.Debug("join raid request", zap.String("dkp: ", err.Error()))
+						_, err = s.ChannelMessageSend(mc.ChannelID, "Failed to join active raid. Check if there is one active.")
+						return
+					}
+					_, err = s.ChannelMessageSend(mc.ChannelID, fmt.Sprintf("%s succesfully joined active raid for this channel", mc.Author.Username))
 				}
+
 			}
 		default:
 			//Silently fail for any unregistered commands
+
 		}
 
 	}

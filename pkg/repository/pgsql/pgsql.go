@@ -30,17 +30,25 @@ const (
 
 //RaidGroup hold specific raid group's DKP
 type RaidGroup struct {
-	ID    string
-	Name  string
-	DKP   map[string]int
-	Raids []Raid
+	ID      string
+	Name    string
+	Members []Member
+	Raids   []Raid
+}
+
+//Member ...
+type Member struct {
+	Name      string
+	DiscordID string
+	DKP       int
+	Class     string
 }
 
 //Raid hold individual raid data
 type Raid struct {
 	ID           string
 	RaidID       uuid.UUID
-	Members      map[string]bool
+	Members      map[string]interface{}
 	StartTime    time.Time
 	EndTime      time.Time
 	ItemsAwarded map[string]int
@@ -145,15 +153,26 @@ func (c *Client) StopRaid(mc *discordgo.MessageCreate) error {
 
 //JoinRaid ...
 func (c *Client) JoinRaid(mc *discordgo.MessageCreate) error {
-	raid := &Raid{}
-	err := c.checkActiveRaid(mc.ChannelID)
-	if err == nil {
-		return errNoActiveRaid
-	}
-	row := c.DB.QueryRow(getActiveRaid, mc.ChannelID)
-	err = row.Scan(&raid.Members)
-	if err != nil {
-		return err
-	}
 
+	// raid := &Raid{}
+	// err := c.checkActiveRaid(mc.ChannelID)
+	// if err == nil {
+	// 	return errNoActiveRaid
+	// }
+	// row := c.DB.QueryRow(getActiveRaid, mc.ChannelID)
+	// err = row.Scan(&raid.Members)
+	// if err != nil {
+	// 	return err
+	// }
+
+	return nil
+
+}
+
+func newMember(discordid, name string) *Member {
+	new := &Member{
+		DiscordID: discordid,
+		Name:      name,
+	}
+	return new
 }

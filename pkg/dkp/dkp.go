@@ -14,6 +14,7 @@ type Repository interface {
 	InitRaidGroup(mc *discordgo.MessageCreate) error
 	StartRaid(mc *discordgo.MessageCreate) error
 	StopRaid(mc *discordgo.MessageCreate) error
+	JoinRaid(mc *discordgo.MessageCreate) error
 }
 
 //New ...
