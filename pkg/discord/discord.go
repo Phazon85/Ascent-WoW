@@ -16,7 +16,7 @@ type DKP interface {
 	InitRaidGroup(mc *discordgo.MessageCreate) error
 	StartRaid(mc *discordgo.MessageCreate) error
 	StopRaid(mc *discordgo.MessageCreate) error
-	JoinRaid(mc *discordgo.MessageCreate) error
+	// JoinRaid(mc *discordgo.MessageCreate) error
 }
 
 //New ...
@@ -34,6 +34,7 @@ func New(dkp DKP, logger *zap.Logger, token, prefix string) *discordgo.Session {
 	//API Endpoints
 	dg.AddHandler(messageCreate(dkp, d))
 	dg.AddHandler(stateReady(prefix, logger))
+	dg.AddHandler(messageReactionAdd())
 
 	err = dg.Open()
 	if err != nil {

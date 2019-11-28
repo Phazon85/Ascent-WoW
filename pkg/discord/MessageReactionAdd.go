@@ -1,90 +1,125 @@
 package discord
 
-// import (
-// 	"log"
+import (
+	"log"
 
-// 	"github.com/bwmarrin/discordgo"
-// )
+	"github.com/bwmarrin/discordgo"
+)
 
-// type mraEvent struct {
-// 	Session      *discordgo.Session
-// 	Guild        *discordgo.Guild
-// 	GuildMember  *discordgo.Member
-// 	GuildRoleMap map[string]*discordgo.Role
-// }
+type mraEvent struct {
+	Session      *discordgo.Session
+	Guild        *discordgo.Guild
+	GuildMember  *discordgo.Member
+	GuildRoleMap map[string]*discordgo.Role
+}
 
-// //MessageReactionAdd is the callback for the MessageReactionAdd event for Discord
-// func (c *Config) MessageReactionAdd(s *discordgo.Session, mra *discordgo.MessageReactionAdd) {
-// 	//Get the user
-// 	user, err := s.User(mra.UserID)
-// 	if err != nil {
-// 		log.Printf("Error getting user in MessageReactionAdd: %s", err.Error())
-// 		return
-// 	}
+const (
+	hordeEmoji      = "633097926402637824"
+	guildMemberRole = "616443279051063313"
+	priestEmoji     = "633096835241869343"
+	priestRole      = "649346745607913524"
+	warriorEmoji    = "633096699266596900"
+	warriorRole     = "649346732697845811"
+	shamanEmoji     = "633096699312734238"
+	shamanRole      = "649346747696676886"
+	paladinEmoji    = "633096699115601923"
+	paladinRole     = "" // I do not currently have a paladin role
+	mageEmoji       = "633096699308539914"
+	mageRole        = "649347010180153344"
+	warlockEmoji    = "633096699031846925"
+	warlockRole     = "649347095685365800"
+	rogueEmoji      = "633096666802552842"
+	rogueRole       = "649346750473175049"
+	hunterEmoji     = "633096699073658892"
+	hunterRole      = "649346973585113090"
+	druidEmoji      = "633096698968801291"
+	druidRole       = "649346874725105665"
+)
 
-// 	//Get the guild
-// 	guild, err := s.Guild(mra.GuildID)
-// 	if err != nil {
-// 		log.Printf("Error getting guild in MessageReactionAdd: %s", err.Error())
-// 		return
-// 	}
+func messageReactionAdd() func(*discordgo.Session, *discordgo.MessageReactionAdd) {
+	return func(s *discordgo.Session, mra *discordgo.MessageReactionAdd) {
+		//Get the user
+		user, err := s.User(mra.UserID)
+		if err != nil {
+			log.Printf("Error getting user in MessageReactionAdd: %s", err.Error())
+			return
+		}
 
-// 	// temp variables for error checking
-// 	found := false
-// 	var guildMember *discordgo.Member
+		//Get the guild
+		guild, err := s.Guild(mra.GuildID)
+		if err != nil {
+			log.Printf("Error getting guild in MessageReactionAdd: %s", err.Error())
+			return
+		}
 
-// 	for _, member := range guild.Members {
-// 		if member.User.ID == user.ID {
-// 			found = true
-// 			guildMember = member
-// 			break
-// 		}
-// 	}
+		// temp variables for error checking
+		found := false
+		var guildMember *discordgo.Member
 
-// 	if !found {
-// 		log.Printf("User not found in guild in MessageReactionAdd: %s", err.Error())
-// 		return
-// 	}
+		for _, member := range guild.Members {
+			if member.User.ID == user.ID {
+				found = true
+				guildMember = member
+				break
+			}
+		}
 
-// 	//Store event info into struct
-// 	event := &mraEvent{
-// 		Session:      s,
-// 		Guild:        guild,
-// 		GuildMember:  guildMember,
-// 		GuildRoleMap: make(map[string]*discordgo.Role),
-// 	}
+		if !found {
+			log.Printf("User not found in guild in MessageReactionAdd: %s", err.Error())
+			return
+		}
 
-// 	for _, role := range event.Guild.Roles {
-// 		event.GuildRoleMap[role.ID] = role
-// 	}
+		//Store event info into struct
+		event := &mraEvent{
+			Session:      s,
+			Guild:        guild,
+			GuildMember:  guildMember,
+			GuildRoleMap: make(map[string]*discordgo.Role),
+		}
 
-// 	switch mra.Emoji.ID {
-// 	//If user reacts with "Horde", apply Guild Member Role to user
-// 	case "633097926402637824":
+		for _, role := range event.Guild.Roles {
+			event.GuildRoleMap[role.ID] = role
+		}
 
-// 		//Checking to see if user already has the Guild Member role
-// 		for _, memberRoleID := range event.GuildMember.Roles {
-// 			if event.GuildRoleMap[memberRoleID].ID == "616443279051063313" {
-// 				return
-// 			}
-// 		}
+		switch mra.Emoji.ID {
+		case priestEmoji:
+			checkGuildRole(event, priestRole)
+		case warriorEmoji:
+			checkGuildRole(event, warriorRole)
+		case shamanEmoji:
+			checkGuildRole(event, shamanRole)
+		case paladinEmoji:
+			checkGuildRole(event, paladinRole)
+		case mageEmoji:
+			checkGuildRole(event, mageRole)
+		case warlockEmoji:
+			checkGuildRole(event, warlockRole)
+		case rogueEmoji:
+			checkGuildRole(event, rogueRole)
+		case hunterEmoji:
+			checkGuildRole(event, hunterRole)
+		case druidEmoji:
+			checkGuildRole(event, druidRole)
+		default:
+			//Silently fail
+		}
 
-// 		//checking to see if role exists in guild, then assigns it to user
-// 		for _, guildRole := range event.GuildRoleMap {
-// 			if guildRole.ID == "616443279051063313" {
-// 				grantGuildMemberRole(event, guildRole)
-// 			}
-// 		}
+	}
+}
 
-// 		//TODO: Add Class emojis to give permissions to view class general chats in discord
-// 	}
+func checkGuildRole(event *mraEvent, guildRoleID string) {
+	for _, guildRole := range event.GuildRoleMap {
+		if guildRole.ID == guildRoleID {
+			grantGuildMemberRole(event, guildRole)
+			return
+		}
+	}
+}
 
-// }
-
-// func grantGuildMemberRole(event *mraEvent, guildRole *discordgo.Role) {
-// 	err := event.Session.GuildMemberRoleAdd(event.Guild.ID, event.GuildMember.User.ID, guildRole.ID)
-// 	if err != nil {
-// 		log.Printf("Failed to add role in granteGuildMemberRole: %s", err.Error())
-// 		return
-// 	}
-// }
+func grantGuildMemberRole(event *mraEvent, guildRole *discordgo.Role) {
+	err := event.Session.GuildMemberRoleAdd(event.Guild.ID, event.GuildMember.User.ID, guildRole.ID)
+	if err != nil {
+		log.Printf("Failed to add role in granteGuildMemberRole: %s", err.Error())
+		return
+	}
+}
