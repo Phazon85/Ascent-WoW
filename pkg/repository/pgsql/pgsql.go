@@ -24,38 +24,38 @@ const (
 	createRaidGroup      = "INSERT INTO raid_groups (id, author) VALUES ($1, $2);"
 	createRaid           = `INSERT INTO raids (id, raidid, start_time, active) 
 					VALUES ($1, $2, $3, $4);`
-	stopRaid      = `UPDATE raids SET active=false WHERE id=$1;`
-	getActiveRaid = `SELECT members FROM raids WHERE id=$1 AND active=true`
+	stopRaid        = `UPDATE raids SET active=false WHERE id=$1;`
+	getActiveRaid   = `SELECT members->>'members' FROM raids WHERE id=$1 AND active=true`
+	selectRaidGroup = `SELECT * FROM raid_groups WHERE id=$1;`
 )
 
-//RaidGroup hold specific raid group's DKP
+//RaidGroup holds specific raid group information
 type RaidGroup struct {
 	ID      string
 	Name    string
 	Members []Member
-	Raids   []Raid
 }
 
-//Member ...
+//Member holds information related to a specific raid member
 type Member struct {
-	Name      string
-	DiscordID string
-	DKP       int
-	Class     string
+	Name      string `json:"name,omitempty"`
+	DiscordID string `json:"discordid,omitempty"`
+	DKP       int    `json:"dkp,omitempty"`
+	Class     string `json:"class,omitempty"`
 }
 
-//Raid hold individual raid data
+//Raid holds individual raid data
 type Raid struct {
 	ID           string
 	RaidID       uuid.UUID
-	Members      map[string]interface{}
+	Members      []Member
 	StartTime    time.Time
 	EndTime      time.Time
 	ItemsAwarded map[string]int
 	Active       bool
 }
 
-//Client ...
+//Client holds our DB connection and methods
 type Client struct {
 	DB *sql.DB
 }
@@ -68,7 +68,8 @@ func New(db *sql.DB) *Client {
 
 }
 
-//InitRaidGroup ...
+//InitRaidGroup will create a raid group if there are currently none made, otherwise will return an error
+//Raid Groups are based on discord channel ID's.
 func (c *Client) InitRaidGroup(mc *discordgo.MessageCreate) error {
 	err := c.checkIfRaidGroupExists(mc.ChannelID)
 	if err != nil {
@@ -101,7 +102,7 @@ func (c *Client) checkIfRaidGroupExists(id string) error {
 	return nil
 }
 
-//StartRaid ...
+//StartRaid check if a raid group exists for the currentl Discord channel ID then creates a new raid with that ID marked as active
 func (c *Client) StartRaid(mc *discordgo.MessageCreate) error {
 	err := c.checkIfRaidGroupExists(mc.ChannelID)
 	if err == nil {
@@ -138,7 +139,7 @@ func newRaid(mc *discordgo.MessageCreate) *Raid {
 	}
 }
 
-//StopRaid ...
+//StopRaid will stop any raid currently active for the discord channel
 func (c *Client) StopRaid(mc *discordgo.MessageCreate) error {
 	err := c.checkActiveRaid(mc.ChannelID)
 	if err != nil {
@@ -153,20 +154,25 @@ func (c *Client) StopRaid(mc *discordgo.MessageCreate) error {
 
 //JoinRaid ...
 func (c *Client) JoinRaid(mc *discordgo.MessageCreate) error {
-
-	// raid := &Raid{}
-	// err := c.checkActiveRaid(mc.ChannelID)
-	// if err == nil {
-	// 	return errNoActiveRaid
-	// }
-	// row := c.DB.QueryRow(getActiveRaid, mc.ChannelID)
-	// err = row.Scan(&raid.Members)
-	// if err != nil {
-	// 	return err
-	// }
-
 	return nil
+}
 
+func (c *Client) getRaidGroup(raidgroupid string) *RaidGroup {
+	rg := &RaidGroup{}
+	row := c.DB.QueryRow(selectRaidGroup, raidgroupid)
+	if err := row.Scan(&rg.ID, rg.Name, rg.Members); err != nil {
+		return nil
+	}
+
+	return rg
+}
+
+func (c *Client) joinRaidGroup(raidgroupid string, member *Member) {
+
+}
+
+func (c *Client) getMember(raidgroupid, discordid string) *Member {
+	return nil
 }
 
 func newMember(discordid, name string) *Member {
