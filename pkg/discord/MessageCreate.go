@@ -1,11 +1,13 @@
 package discord
 
 import (
+	"fmt"
 	"strings"
 
 	"go.uber.org/zap"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/phazon85/ascent-wow/pkg/wowsvr"
 )
 
 const (
@@ -84,11 +86,17 @@ func messageCreate(d *Discord) func(*discordgo.Session, *discordgo.MessageCreate
 
 		// 	}
 		case "account":
-			if len(contentTokens) <= 2 {
-				//Send account command syntax to channel
-				s.ChannelMessageSend(mc.ChannelID, "test")
-			}
 
+			if len(contentTokens) >= 3 {
+				acct := contentTokens[2]
+				if len(contentTokens) >= 4 {
+					pass := contentTokens[3]
+					accountHandler(acct, pass, s, mc)
+					return
+				}
+				accountHandler(acct, "", s, mc)
+				return
+			}
 			//TODO: add HTTP requests to private server to create and reset password
 		default:
 			//Silently fail for any unregistered commands
@@ -98,26 +106,26 @@ func messageCreate(d *Discord) func(*discordgo.Session, *discordgo.MessageCreate
 	}
 }
 
-func accountHandler(acc, pass string, s *discordgo.Session, mc *discordgo.MessageCreate) error { //process new account
+func accountHandler(acct, pass string, s *discordgo.Session, mc *discordgo.MessageCreate) error { //process new account
 	st, err := s.UserChannelCreate(mc.Author.ID)
 	if err != nil {
 		return err
 	}
-	switch acc {
+	switch pass {
 	case "":
-		return nil
-
-	default:
-		//TODO: Add user authentication tied to discord account? for resetpassword command
-		//add copying of template characters to account with extra gear either in bag or in bank
-		if len(acc) >= 2 {
-			both := acc + pass
-			//process new account
-			s.ChannelMessageSend(st.ID, both)
-			return nil
+		err := wowsvr.PostAccount(acct, "")
+		if err != nil {
+			return err
 		}
+		s.ChannelMessageSend(st.ID, "Account created with default password: password123")
+		return nil
+	default:
 		//if no password is provided, assign default password and inform them of the resetpassword command
-		s.ChannelMessageSend(st.ID, acc)
+		err := wowsvr.PostAccount(acct, pass)
+		if err != nil {
+			return err
+		}
+		s.ChannelMessageSend(st.ID, fmt.Sprintf("Account created with password: %s", pass))
 		return nil
 	}
 }

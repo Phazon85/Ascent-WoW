@@ -1,5 +1,5 @@
 build-docker:
-		docker build -t dgparker/ascent-wow:latest -f ./build/package/Dockerfile .
+		docker build -t phazon85/ascent-wow:latest -f ./build/package/Dockerfile .
 
 push-docker:
-		docker push dgparker/ascent-wow:latest
+		docker push phazon85/ascent-wow:latest

@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/phazon85/Ascent-WoW/pkg/discord"
+	"github.com/phazon85/ascent-wow/pkg/discord"
 	"go.uber.org/zap"
 )
 
