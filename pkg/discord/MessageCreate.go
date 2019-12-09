@@ -1,7 +1,6 @@
 package discord
 
 import (
-	"fmt"
 	"strings"
 
 	"go.uber.org/zap"
@@ -14,7 +13,7 @@ const (
 	errActiveRaid             = `Active raid currently exists for your channel. Stop current raid before attempting to start a new one.`
 )
 
-func messageCreate(dkp DKP, d *Discord) func(*discordgo.Session, *discordgo.MessageCreate) {
+func messageCreate(d *Discord) func(*discordgo.Session, *discordgo.MessageCreate) {
 	return func(s *discordgo.Session, mc *discordgo.MessageCreate) {
 		// Ignore all messages created by the bot itself
 		if mc.Author.ID == s.State.User.ID {
@@ -46,52 +45,48 @@ func messageCreate(dkp DKP, d *Discord) func(*discordgo.Session, *discordgo.Mess
 				d.Logger.Debug("Sending Help message", zap.String("mc: ", err.Error()))
 				return
 			}
-		case "raid":
-			if len(contentTokens) >= 3 {
-				raidOpt := strings.ToLower(contentTokens[2])
+		// case "raid":
+		// 	if len(contentTokens) >= 3 {
+		// 		raidOpt := strings.ToLower(contentTokens[2])
 
-				switch raidOpt {
-				case "init":
-					err := dkp.InitRaidGroup(mc)
-					if err != nil {
-						d.Logger.Debug("init raid request", zap.String("dkp: ", err.Error()))
-					}
-					_, err = s.ChannelMessageSend(mc.ChannelID, errRaidGroupAlreadyExists)
-				case "start":
-					err := dkp.StartRaid(mc)
-					if err != nil {
-						d.Logger.Debug("start raid request", zap.String("dkp: ", err.Error()))
-						_, err = s.ChannelMessageSend(mc.ChannelID, errActiveRaid)
-						return
-					}
-					_, err = s.ChannelMessageSend(mc.ChannelID, "Successfully started Raid")
-				case "stop":
-					err := dkp.StopRaid(mc)
-					if err != nil {
-						d.Logger.Debug("stop raid request", zap.String("dkp: ", err.Error()))
-						_, err = s.ChannelMessageSend(mc.ChannelID, "Failed to stop active raid. Please try again")
-						return
-					}
-					_, err = s.ChannelMessageSend(mc.ChannelID, "Successfully stopped Raid")
-				case "join":
-					err := dkp.JoinRaid(mc)
-					if err != nil {
-						d.Logger.Debug("join raid request", zap.String("dkp: ", err.Error()))
-						_, err = s.ChannelMessageSend(mc.ChannelID, "Failed to join active raid. Check if there is one active.")
-						return
-					}
-					_, err = s.ChannelMessageSend(mc.ChannelID, fmt.Sprintf("%s succesfully joined active raid for this channel", mc.Author.Username))
-				}
+		// 		switch raidOpt {
+		// 		case "init":
+		// 			err := dkp.InitRaidGroup(mc)
+		// 			if err != nil {
+		// 				d.Logger.Debug("init raid request", zap.String("dkp: ", err.Error()))
+		// 			}
+		// 			_, err = s.ChannelMessageSend(mc.ChannelID, errRaidGroupAlreadyExists)
+		// 		case "start":
+		// 			err := dkp.StartRaid(mc)
+		// 			if err != nil {
+		// 				d.Logger.Debug("start raid request", zap.String("dkp: ", err.Error()))
+		// 				_, err = s.ChannelMessageSend(mc.ChannelID, errActiveRaid)
+		// 				return
+		// 			}
+		// 			_, err = s.ChannelMessageSend(mc.ChannelID, "Successfully started Raid")
+		// 		case "stop":
+		// 			err := dkp.StopRaid(mc)
+		// 			if err != nil {
+		// 				d.Logger.Debug("stop raid request", zap.String("dkp: ", err.Error()))
+		// 				_, err = s.ChannelMessageSend(mc.ChannelID, "Failed to stop active raid. Please try again")
+		// 				return
+		// 			}
+		// 			_, err = s.ChannelMessageSend(mc.ChannelID, "Successfully stopped Raid")
+		// 		case "join":
+		// 			err := dkp.JoinRaid(mc)
+		// 			if err != nil {
+		// 				d.Logger.Debug("join raid request", zap.String("dkp: ", err.Error()))
+		// 				_, err = s.ChannelMessageSend(mc.ChannelID, "Failed to join active raid. Check if there is one active.")
+		// 				return
+		// 			}
+		// 			_, err = s.ChannelMessageSend(mc.ChannelID, fmt.Sprintf("%s succesfully joined active raid for this channel", mc.Author.Username))
+		// 		}
 
-			}
+		// 	}
 		case "account":
 			if len(contentTokens) <= 2 {
 				//Send account command syntax to channel
 				s.ChannelMessageSend(mc.ChannelID, "test")
-			}
-			err := accountHandler(acc, pass, s, mc)
-			if err != nil {
-				d.Logger.Debug("account handler", zap.String("account: ", err.Error()))
 			}
 
 			//TODO: add HTTP requests to private server to create and reset password

@@ -11,16 +11,16 @@ type Discord struct {
 	Prefix string
 }
 
-//DKP ...
-type DKP interface {
-	InitRaidGroup(mc *discordgo.MessageCreate) error
-	StartRaid(mc *discordgo.MessageCreate) error
-	StopRaid(mc *discordgo.MessageCreate) error
-	JoinRaid(mc *discordgo.MessageCreate) error
-}
+// //DKP ...
+// type DKP interface {
+// 	InitRaidGroup(mc *discordgo.MessageCreate) error
+// 	StartRaid(mc *discordgo.MessageCreate) error
+// 	StopRaid(mc *discordgo.MessageCreate) error
+// 	JoinRaid(mc *discordgo.MessageCreate) error
+// }
 
 //New ...
-func New(dkp DKP, logger *zap.Logger, token, prefix string) *discordgo.Session {
+func New(logger *zap.Logger, token, prefix string) *discordgo.Session {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		logger.Debug("Failed to generate new Discord session", zap.String("Error", err.Error()))
@@ -32,7 +32,7 @@ func New(dkp DKP, logger *zap.Logger, token, prefix string) *discordgo.Session {
 	}
 
 	//API Endpoints
-	dg.AddHandler(messageCreate(dkp, d))
+	dg.AddHandler(messageCreate(d))
 	dg.AddHandler(stateReady(prefix, logger))
 	dg.AddHandler(messageReactionAdd())
 
