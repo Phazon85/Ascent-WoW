@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ascent-wow
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: 443
+  selector:
+    app: ascent-wow
+  sessionAffinity: None
+  type: ClusterIP
