@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ascent-wow
-        image: docker.io/dgparker/ascent-wow
+        image: docker.io/dgparker/ascent-wow:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 443
