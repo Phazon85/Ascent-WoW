@@ -10,4 +10,4 @@ spec:
   selector:
     app: ascent-wow
   sessionAffinity: None
-  type: ClusterIP
+  type: NodePort
