@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"fmt"
 	"strings"
 
 	"go.uber.org/zap"
@@ -73,24 +74,26 @@ func messageCreate(dkp DKP, d *Discord) func(*discordgo.Session, *discordgo.Mess
 					}
 					_, err = s.ChannelMessageSend(mc.ChannelID, "Successfully stopped Raid")
 				case "join":
-					// _ = dkp.JoinRaid(mc)
-					// if err != nil {
-					// 	d.Logger.Debug("join raid request", zap.String("dkp: ", err.Error()))
-					// 	_, err = s.ChannelMessageSend(mc.ChannelID, "Failed to join active raid. Check if there is one active.")
-					// 	return
-					// }
-					// _, err = s.ChannelMessageSend(mc.ChannelID, fmt.Sprintf("%s succesfully joined active raid for this channel", mc.Author.Username))
+					err := dkp.JoinRaid(mc)
+					if err != nil {
+						d.Logger.Debug("join raid request", zap.String("dkp: ", err.Error()))
+						_, err = s.ChannelMessageSend(mc.ChannelID, "Failed to join active raid. Check if there is one active.")
+						return
+					}
+					_, err = s.ChannelMessageSend(mc.ChannelID, fmt.Sprintf("%s succesfully joined active raid for this channel", mc.Author.Username))
 				}
 
 			}
 		case "account":
-			if len(contentTokens) >= 3 {
-				accountOpt := strings.ToLower(contentTokens[2])
-				err := accountHandler(accountOpt)
-				if err != nil {
-					d.Logger.Debug("account handler", zap.String("account: ", err.Error()))
-				}
+			if len(contentTokens) <= 2 {
+				//Send account command syntax to channel
+				s.ChannelMessageSend(mc.ChannelID, "test")
 			}
+			err := accountHandler(acc, pass, s, mc)
+			if err != nil {
+				d.Logger.Debug("account handler", zap.String("account: ", err.Error()))
+			}
+
 			//TODO: add HTTP requests to private server to create and reset password
 		default:
 			//Silently fail for any unregistered commands
@@ -100,11 +103,26 @@ func messageCreate(dkp DKP, d *Discord) func(*discordgo.Session, *discordgo.Mess
 	}
 }
 
-func accountHandler(accountOpt string) error {
-	switch accountOpt {
-	case "create":
+func accountHandler(acc, pass string, s *discordgo.Session, mc *discordgo.MessageCreate) error { //process new account
+	st, err := s.UserChannelCreate(mc.Author.ID)
+	if err != nil {
+		return err
+	}
+	switch acc {
+	case "":
 		return nil
+
 	default:
+		//TODO: Add user authentication tied to discord account? for resetpassword command
+		//add copying of template characters to account with extra gear either in bag or in bank
+		if len(acc) >= 2 {
+			both := acc + pass
+			//process new account
+			s.ChannelMessageSend(st.ID, both)
+			return nil
+		}
+		//if no password is provided, assign default password and inform them of the resetpassword command
+		s.ChannelMessageSend(st.ID, acc)
 		return nil
 	}
 }

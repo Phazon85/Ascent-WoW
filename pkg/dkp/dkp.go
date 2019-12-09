@@ -14,7 +14,7 @@ type Repository interface {
 	InitRaidGroup(mc *discordgo.MessageCreate) error
 	StartRaid(mc *discordgo.MessageCreate) error
 	StopRaid(mc *discordgo.MessageCreate) error
-	// JoinRaid(mc *discordgo.MessageCreate) error
+	JoinRaid(mc *discordgo.MessageCreate) error
 }
 
 //New ...
@@ -37,4 +37,9 @@ func (s *Service) StartRaid(mc *discordgo.MessageCreate) error {
 //StopRaid ...
 func (s *Service) StopRaid(mc *discordgo.MessageCreate) error {
 	return s.repo.StopRaid(mc)
+}
+
+//JoinRaid ...
+func (s *Service) JoinRaid(mc *discordgo.MessageCreate) error {
+	return s.repo.JoinRaid(mc)
 }
