@@ -20,7 +20,7 @@ func PostAccount(acc, pass string) error {
 			return err
 		}
 
-		_, err = http.Post("127.0.0.1", "application/json", bytes.NewBuffer(body))
+		_, err = http.Post("mangos-account-creation:9000", "application/json", bytes.NewBuffer(body))
 		if err != nil {
 			return err
 		}
@@ -35,7 +35,7 @@ func PostAccount(acc, pass string) error {
 			return err
 		}
 
-		_, err = http.Post("127.0.0.1", "application/json", bytes.NewBuffer(body))
+		_, err = http.Post("mangos-account-creation:9000", "application/json", bytes.NewBuffer(body))
 		if err != nil {
 			return err
 		}

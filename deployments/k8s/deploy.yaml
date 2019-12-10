@@ -20,3 +20,16 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 443
+        env:
+          - name: ASCENT_WOW_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: discordtoken
+                key: token
+          - name: ASCENT_WOW_KEYWORD
+            valueFrom:
+              secretKeyRef:
+                name: discordprefix
+                key: prefix
+          - name: ASCENT_WOW_ENV
+            value: "prod"
